@@ -154,8 +154,6 @@ class ATLAS:
             trajectories.append(np.array(body_trajectory))
         return trajectories
 
-    # ... (다른 메서드들은 그대로 유지)
-
     def save_csv(self, filename):
         # 결과를 CSV 파일로 저장하는 메서드
         with open(filename, 'w', newline='') as csvfile:

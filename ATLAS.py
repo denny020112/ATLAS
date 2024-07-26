@@ -190,8 +190,10 @@ class ATLAS:
     def run(self):
         self.read_input()
         self.results = self.calculate_trajectories()
-        self.save_csv(self.input_file.replace('.inp', '_output.csv'))
-        self.create_animation(self.input_file.replace('.inp', '_animation.gif'))
+        csv_filename = self.output_settings['csv_filename']
+        self.save_csv(csv_filename)
+        gif_filename = self.output_settings['gif_filename']
+        self.create_animation(gif_filename)
 
 def main(input_file):
     atlas = ATLAS(input_file)

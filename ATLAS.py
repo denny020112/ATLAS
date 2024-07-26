@@ -5,6 +5,7 @@ from wolframclient.evaluation import WolframLanguageSession
 from wolframclient.language import wl, wlexpr
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
+import numpy as np
 import re
 
 class ATLAS:
@@ -85,11 +86,75 @@ class ATLAS:
         print(self.additional_physics)
 
     def calculate_trajectories(self):
-        # Wolfram을 사용하여 궤적을 계산하는 메서드
         session = WolframLanguageSession()
-        # 여기에 Wolfram 계산 로직 구현
-        session.terminate()
-        return results
+        try:
+            # Wolfram Language 코드 생성
+            code = self.generate_wolfram_code()
+            
+            # Wolfram Language 코드 실행
+            result = session.evaluate(wlexpr(code))
+            
+            # 결과 처리
+            trajectories = self.process_wolfram_result(result)
+            
+            return trajectories
+        
+        finally:
+            session.terminate()
+
+    def generate_wolfram_code(self):
+        # Wolfram Language 코드 생성
+        code = f"""
+        G = {self.physical_constants['G']};
+        bodies = {self.bodies};
+        tmax = {self.simulation_params['total_time']};
+        dt = {self.simulation_params['time_step']};
+        
+        n = Length[bodies];
+        m = Table[bodies[[i, "mass"]], {{i, n}}];
+        
+        initialConditions = Flatten[Table[
+            {{
+                x[i][0] == bodies[[i, "position", 1]],
+                y[i][0] == bodies[[i, "position", 2]],
+                z[i][0] == bodies[[i, "position", 3]],
+                x'[i][0] == bodies[[i, "velocity", 1]],
+                y'[i][0] == bodies[[i, "velocity", 2]],
+                z'[i][0] == bodies[[i, "velocity", 3]]
+            }},
+            {{i, n}}
+        ]];
+        
+        equations = Flatten[Table[
+            {{
+                x''[i][t] == Sum[G m[[j]] (x[j][t] - x[i][t])/((x[j][t] - x[i][t])^2 + (y[j][t] - y[i][t])^2 + (z[j][t] - z[i][t])^2)^(3/2), {{j, n, j != i}}],
+                y''[i][t] == Sum[G m[[j]] (y[j][t] - y[i][t])/((x[j][t] - x[i][t])^2 + (y[j][t] - y[i][t])^2 + (z[j][t] - z[i][t])^2)^(3/2), {{j, n, j != i}}],
+                z''[i][t] == Sum[G m[[j]] (z[j][t] - z[i][t])/((x[j][t] - x[i][t])^2 + (y[j][t] - y[i][t])^2 + (z[j][t] - z[i][t])^2)^(3/2), {{j, n, j != i}}]
+            }},
+            {{i, n}}
+        ]];
+        
+        sol = NDSolve[Join[equations, initialConditions], 
+                      Flatten[Table[{{x[i], y[i], z[i]}}, {{i, n}}]], 
+                      {{t, 0, tmax}}, 
+                      MaxSteps -> Infinity];
+        
+        Table[{{x[i][t], y[i][t], z[i][t]}} /. sol, {{i, n}}]
+        """
+        return code
+
+    def process_wolfram_result(self, result):
+        # Wolfram 결과를 Python 데이터 구조로 변환
+        trajectories = []
+        for body_result in result:
+            body_trajectory = []
+            for point in body_result[0]:
+                x, y, z = point
+                body_trajectory.append([float(x), float(y), float(z)])
+            trajectories.append(np.array(body_trajectory))
+        return trajectories
+
+    # ... (다른 메서드들은 그대로 유지)
 
     def save_csv(self, filename):
         # 결과를 CSV 파일로 저장하는 메서드

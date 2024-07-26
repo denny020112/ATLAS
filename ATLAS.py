@@ -155,10 +155,25 @@ class ATLAS:
         return trajectories
 
     def save_csv(self, filename):
-        # 결과를 CSV 파일로 저장하는 메서드
         with open(filename, 'w', newline='') as csvfile:
             writer = csv.writer(csvfile)
-            # 여기에 CSV 저장 로직 구현
+            
+            # 헤더 작성
+            header = ['Time']
+            for i, body in enumerate(self.bodies):
+                header.extend([f"Body{i+1}_X", f"Body{i+1}_Y", f"Body{i+1}_Z"])
+            writer.writerow(header)
+            
+            # 데이터 작성
+            num_timesteps = len(self.results[0])
+            for t in range(num_timesteps):
+                row = [t * self.simulation_params['time_step']]  # 시간 추가
+                for body_trajectory in self.results:
+                    row.extend(body_trajectory[t])  # 각 천체의 x, y, z 좌표 추가
+                writer.writerow(row)
+
+        print(f"CSV file saved: {filename}")
+
 
     def create_animation(self, filename):
         # 결과를 GIF 애니메이션으로 저장하는 메서드

@@ -96,6 +96,9 @@ class ATLAS:
             # Wolfram Language 코드 실행
             result = session.evaluate(wlexpr(code))
             
+            print("Raw Wolfram result:")
+            print(result)
+            
             # 결과 처리
             trajectories = self.process_wolfram_result(result)
             
@@ -103,23 +106,21 @@ class ATLAS:
                 raise ValueError("Failed to process Wolfram result")
             
             return trajectories
-    
+        
         except Exception as e:
             print(f"Error in calculate_trajectories: {str(e)}")
             print("Wolfram code:")
             print(code)
-            print("Raw result:")
-            print(result)
             return None
-    
+        
         finally:
             session.terminate()
 
     def generate_wolfram_code(self):
-        bodies_str = str(self.bodies).replace("'", "\"")
+        bodies_str = json.dumps(self.bodies).replace('"', '\\"')
         code = f"""
         G = {self.physical_constants['G']};
-        bodies = ToExpression["{bodies_str}"];
+        bodies = ImportString["{bodies_str}", "JSON"];
         tmax = {self.simulation_params['total_time']};
         dt = {self.simulation_params['time_step']};
         
@@ -184,6 +185,10 @@ class ATLAS:
             return None
     
     def save_csv(self, filename):
+        if self.results is None or len(self.results) == 0:
+            print("No results to save. CSV file not created.")
+            return
+
         with open(filename, 'w', newline='') as csvfile:
             writer = csv.writer(csvfile)
             
@@ -269,6 +274,9 @@ class ATLAS:
     def run(self):
         self.read_input()
         self.results = self.calculate_trajectories()
+        if self.results is None:
+            print("Failed to calculate trajectories. Exiting.")
+            return
         csv_filename = self.output_settings['csv_filename']
         self.save_csv(csv_filename)
         gif_filename = self.output_settings['gif_filename']

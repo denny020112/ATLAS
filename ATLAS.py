@@ -104,10 +104,10 @@ class ATLAS:
             session.terminate()
 
     def generate_wolfram_code(self):
-        # Wolfram Language 코드 생성
+        bodies_str = str(self.bodies).replace("'", "\"")
         code = f"""
         G = {self.physical_constants['G']};
-        bodies = {self.bodies};
+        bodies = ToExpression["{bodies_str}"];
         tmax = {self.simulation_params['total_time']};
         dt = {self.simulation_params['time_step']};
         
@@ -136,11 +136,11 @@ class ATLAS:
         ]];
         
         sol = NDSolve[Join[equations, initialConditions], 
-                      Flatten[Table[{{x[i], y[i], z[i]}}, {{i, n}}]], 
-                      {{t, 0, tmax}}, 
-                      MaxSteps -> Infinity];
+                    Flatten[Table[{{x[i], y[i], z[i]}}, {{i, n}}]], 
+                    {{t, 0, tmax}}, 
+                    MaxSteps -> Infinity];
         
-        Table[{{x[i][t], y[i][t], z[i][t]}} /. sol, {{i, n}}]
+        ExportString[Table[{{x[i][t], y[i][t], z[i][t]}} /. sol, {{i, n}}] /. t -> Range[0, tmax, dt], "JSON"]
         """
         return code
 

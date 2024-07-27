@@ -96,10 +96,14 @@ class ATLAS:
             # Wolfram Language 코드 실행
             result = session.evaluate(wlexpr(code))
             
+            print("Raw Wolfram result type:", type(result))
             print("Raw Wolfram result:")
             print(result)
             
             # 결과 처리
+            if result == '$Failed':
+                raise ValueError("Wolfram evaluation failed")
+            
             trajectories = self.process_wolfram_result(result)
             
             if trajectories is None:
@@ -153,7 +157,8 @@ class ATLAS:
                     {{t, 0, tmax}}, 
                     MaxSteps -> Infinity];
         
-        ExportString[Table[{{x[i][t], y[i][t], z[i][t]}} /. sol, {{i, n}}] /. t -> Range[0, tmax, dt], "JSON"]
+        result = Table[{{x[i][t], y[i][t], z[i][t]}} /. sol, {{i, n}}] /. t -> Range[0, tmax, dt];
+        ExportString[N[result], "JSON"]
         """
         return code
 

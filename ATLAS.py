@@ -1,5 +1,6 @@
 import sys
 import csv
+import json
 import wolframclient
 from wolframclient.evaluation import WolframLanguageSession
 from wolframclient.language import wl, wlexpr
@@ -144,17 +145,34 @@ class ATLAS:
         """
         return code
 
-    def process_wolfram_result(self, result):
-        # Wolfram 결과를 Python 데이터 구조로 변환
-        trajectories = []
-        for body_result in result:
-            body_trajectory = []
-            for point in body_result[0]:
-                x, y, z = point
-                body_trajectory.append([float(x), float(y), float(z)])
-            trajectories.append(np.array(body_trajectory))
-        return trajectories
 
+    def process_wolfram_result(self, result):
+        try:
+            # result가 문자열이 아닌 경우 문자열로 변환
+            if not isinstance(result, str):
+                result = str(result)
+            
+            # 작은따옴표를 큰따옴표로 변경 (JSON 형식에 맞춤)
+            result = result.replace("'", "\"")
+            
+            data = json.loads(result)
+            trajectories = []
+            for body_result in data:
+                body_trajectory = []
+                for point in body_result:
+                    x, y, z = point[0]
+                    body_trajectory.append([float(x), float(y), float(z)])
+                trajectories.append(np.array(body_trajectory))
+            return trajectories
+        except json.JSONDecodeError as e:
+            print(f"Error: Unable to parse Wolfram result as JSON: {str(e)}")
+            print("Raw result:", result)
+            return None
+        except Exception as e:
+            print(f"Error in processing Wolfram result: {str(e)}")
+            print("Raw result:", result)
+            return None
+    
     def save_csv(self, filename):
         with open(filename, 'w', newline='') as csvfile:
             writer = csv.writer(csvfile)

@@ -176,6 +176,21 @@ class ATLAS:
         print(f"CSV file saved: {filename}")
 
 
+    def update_animation(self, frame, trails, scatters):
+        for body_index, body_trajectory in enumerate(self.results):
+            # 궤적 업데이트
+            trails[body_index].set_data(body_trajectory[:frame, 0], body_trajectory[:frame, 1])
+            trails[body_index].set_3d_properties(body_trajectory[:frame, 2])
+            
+            # 현재 위치 업데이트
+            scatters[body_index]._offsets3d = (
+                body_trajectory[frame:frame+1, 0],
+                body_trajectory[frame:frame+1, 1],
+                body_trajectory[frame:frame+1, 2]
+            )
+        
+        return trails + scatters
+
     def create_animation(self, filename):
         # 3D 그래프 설정
         fig = plt.figure(figsize=(10, 8))
@@ -212,23 +227,10 @@ class ATLAS:
         ax.set_ylim3d([mid_y - max_range, mid_y + max_range])
         ax.set_zlim3d([mid_z - max_range, mid_z + max_range])
 
-        def update(frame):
-            for body_index, body_trajectory in enumerate(self.results):
-                # 궤적 업데이트
-                trails[body_index].set_data(body_trajectory[:frame, 0], body_trajectory[:frame, 1])
-                trails[body_index].set_3d_properties(body_trajectory[:frame, 2])
-                
-                # 현재 위치 업데이트
-                scatters[body_index]._offsets3d = (
-                    body_trajectory[frame:frame+1, 0],
-                    body_trajectory[frame:frame+1, 1],
-                    body_trajectory[frame:frame+1, 2]
-                )
-            
-            return trails + scatters
-
         # 애니메이션 생성
-        anim = animation.FuncAnimation(fig, update, frames=len(self.results[0]),
+        anim = animation.FuncAnimation(fig, 
+                                       lambda frame: self.update_animation(frame, trails, scatters), 
+                                       frames=len(self.results[0]),
                                        interval=50, blit=False)
 
         # GIF로 저장
@@ -236,10 +238,6 @@ class ATLAS:
         plt.close(fig)
 
         print(f"Animation saved as {filename}")
-    def update_animation(self, frame):
-        # 애니메이션 프레임 업데이트 메서드
-        # 여기에 프레임 업데이트 로직 구현
-        pass
 
     def run(self):
         self.read_input()

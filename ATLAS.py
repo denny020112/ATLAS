@@ -156,7 +156,6 @@ class ATLAS:
         """
         return code
 
-
     def process_wolfram_result(self, result):
         try:
             # result가 문자열이 아닌 경우 문자열로 변환
@@ -203,7 +202,6 @@ class ATLAS:
                 writer.writerow(row)
 
         print(f"CSV file saved: {filename}")
-
 
     def update_animation(self, frame, trails, scatters):
         for body_index, body_trajectory in enumerate(self.results):

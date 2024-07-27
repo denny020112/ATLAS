@@ -5,6 +5,7 @@ from wolframclient.evaluation import WolframLanguageSession
 from wolframclient.language import wl, wlexpr
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
+from mpl_toolkits.mplot3d import Axes3D
 import numpy as np
 import re
 
@@ -176,10 +177,6 @@ class ATLAS:
 
 
     def create_animation(self, filename):
-        # 결과를 GIF 애니메이션으로 저장하는 메서드
-        fig, ax = plt.subplots()
-        # 여기에 애니메이션 생성 로직 구현
-          def create_animation(self, filename):
         # 3D 그래프 설정
         fig = plt.figure(figsize=(10, 8))
         ax = fig.add_subplot(111, projection='3d')
@@ -238,9 +235,7 @@ class ATLAS:
         anim.save(filename, writer='pillow', fps=30)
         plt.close(fig)
 
-        print(f"Animation saved as {filename}")  anim = animation.FuncAnimation(fig, self.update_animation, frames=len(self.results), interval=50)
-        anim.save(filename, writer='pillow')
-
+        print(f"Animation saved as {filename}")
     def update_animation(self, frame):
         # 애니메이션 프레임 업데이트 메서드
         # 여기에 프레임 업데이트 로직 구현

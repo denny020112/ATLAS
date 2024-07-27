@@ -179,7 +179,66 @@ class ATLAS:
         # 결과를 GIF 애니메이션으로 저장하는 메서드
         fig, ax = plt.subplots()
         # 여기에 애니메이션 생성 로직 구현
-        anim = animation.FuncAnimation(fig, self.update_animation, frames=len(self.results), interval=50)
+          def create_animation(self, filename):
+        # 3D 그래프 설정
+        fig = plt.figure(figsize=(10, 8))
+        ax = fig.add_subplot(111, projection='3d')
+
+        # 각 천체의 궤적을 저장할 리스트
+        trails = []
+        # 각 천체를 나타내는 산점도를 저장할 리스트
+        scatters = []
+
+        # 축 범위 계산
+        all_positions = np.concatenate(self.results)
+        max_range = np.max(all_positions.max(axis=0) - all_positions.min(axis=0)) / 2.0
+        mid_x = (all_positions[:, 0].min() + all_positions[:, 0].max()) / 2
+        mid_y = (all_positions[:, 1].min() + all_positions[:, 1].max()) / 2
+        mid_z = (all_positions[:, 2].min() + all_positions[:, 2].max()) / 2
+
+        # 각 천체에 대한 초기 설정
+        colors = plt.cm.jet(np.linspace(0, 1, len(self.results)))
+        for body_index, body_trajectory in enumerate(self.results):
+            trail, = ax.plot([], [], [], color=colors[body_index], linewidth=1, alpha=0.5)
+            scatter = ax.scatter([], [], [], color=colors[body_index], s=50)
+            trails.append(trail)
+            scatters.append(scatter)
+
+        # 축 레이블 및 제목 설정
+        ax.set_xlabel('X')
+        ax.set_ylabel('Y')
+        ax.set_zlabel('Z')
+        ax.set_title('N-Body Gravitational Simulation')
+
+        # 축 범위 설정
+        ax.set_xlim3d([mid_x - max_range, mid_x + max_range])
+        ax.set_ylim3d([mid_y - max_range, mid_y + max_range])
+        ax.set_zlim3d([mid_z - max_range, mid_z + max_range])
+
+        def update(frame):
+            for body_index, body_trajectory in enumerate(self.results):
+                # 궤적 업데이트
+                trails[body_index].set_data(body_trajectory[:frame, 0], body_trajectory[:frame, 1])
+                trails[body_index].set_3d_properties(body_trajectory[:frame, 2])
+                
+                # 현재 위치 업데이트
+                scatters[body_index]._offsets3d = (
+                    body_trajectory[frame:frame+1, 0],
+                    body_trajectory[frame:frame+1, 1],
+                    body_trajectory[frame:frame+1, 2]
+                )
+            
+            return trails + scatters
+
+        # 애니메이션 생성
+        anim = animation.FuncAnimation(fig, update, frames=len(self.results[0]),
+                                       interval=50, blit=False)
+
+        # GIF로 저장
+        anim.save(filename, writer='pillow', fps=30)
+        plt.close(fig)
+
+        print(f"Animation saved as {filename}")  anim = animation.FuncAnimation(fig, self.update_animation, frames=len(self.results), interval=50)
         anim.save(filename, writer='pillow')
 
     def update_animation(self, frame):

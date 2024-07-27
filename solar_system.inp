@@ -1,0 +1,41 @@
+# Simulation Parameters
+TOTAL_TIME: 365.25
+TIME_STEP: 0.1
+INTEGRATION_METHOD: RK4
+
+# Physical Constants
+G: 6.67430e-11
+
+# Output Settings
+OUTPUT_INTERVAL: 1
+CSV_FILENAME: solar_system_simulation.csv
+GIF_FILENAME: solar_system_animation.gif
+GIF_SPEED: 30
+
+# Celestial Bodies
+NUM_BODIES: 3
+
+# Body 1 (Sun)
+MASS: 1.989e30
+POSITION: 0, 0, 0
+VELOCITY: 0, 0, 0
+RADIUS: 696340000
+NAME: Sun
+
+# Body 2 (Earth)
+MASS: 5.972e24
+POSITION: 1.496e11, 0, 0
+VELOCITY: 0, 29780, 0
+RADIUS: 6371000
+NAME: Earth
+
+# Body 3 (Moon)
+MASS: 7.34767309e22
+POSITION: 1.496e11, 384400000, 0
+VELOCITY: 0, 29780, 1022
+RADIUS: 1737100
+NAME: Moon
+
+# Additional Physics
+RELATIVISTIC_EFFECTS: False
+COLLISION_DETECTION: False

@@ -1,1 +1,19 @@
 ATLAS (Advanced Trajectory and Locus Analysis System)
+
+Languages Used:
+- Python, for overall structure of the program and production of animation and CSV
+- Wolfram, for calculation itself
+
+
+Input structure:
+
+
+Command line: 
+open powershell or command console at the directory where this program is.
+> command line should look like below:
+  python atlas.py input_file.inp
+
+  
+You can replace "input_file.inp" with actual *.inp file name. 
+> e.g.
+  python atlas.py solar_system.inp 

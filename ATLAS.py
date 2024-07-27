@@ -99,8 +99,19 @@ class ATLAS:
             # 결과 처리
             trajectories = self.process_wolfram_result(result)
             
+            if trajectories is None:
+                raise ValueError("Failed to process Wolfram result")
+            
             return trajectories
-        
+    
+        except Exception as e:
+            print(f"Error in calculate_trajectories: {str(e)}")
+            print("Wolfram code:")
+            print(code)
+            print("Raw result:")
+            print(result)
+            return None
+    
         finally:
             session.terminate()
 
